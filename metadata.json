@@ -1,0 +1,6 @@
+{
+  "name": "Edem Restaurant",
+  "description": "Luxury fine dining restaurant website featuring interactive menu exploration, atmospheric ambiance showcase, dish highlights, upcoming culinary events, and online table reservations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
