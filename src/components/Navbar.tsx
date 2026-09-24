@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Currency } from '../types';
-import { Menu, X, CalendarCheck, Clock, MapPin, Phone } from 'lucide-react';
+import { Menu, X, CalendarCheck, Clock, MapPin, Phone, ShoppingBag, Volume2, VolumeX, Wine, Sparkles } from 'lucide-react';
+import { ambientSound } from '../utils/audioAmbiance';
 
 interface NavbarProps {
   currentCurrency: Currency;
   onCurrencyChange: (curr: Currency) => void;
   onOpenMenuModal: () => void;
   onOpenReservation: () => void;
+  cartCount?: number;
+  onOpenCart?: () => void;
+  onOpenSommelier?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -14,9 +18,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   onCurrencyChange,
   onOpenMenuModal,
   onOpenReservation,
+  cartCount = 0,
+  onOpenCart,
+  onOpenSommelier,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
+  const toggleSound = () => {
+    const playing = ambientSound.toggle();
+    setIsAudioPlaying(playing);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+        <nav className="hidden md:flex items-center gap-7 lg:gap-8">
           <button
             id="nav-link-home"
             onClick={() => scrollToSection('home')}
@@ -89,6 +102,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             Menu
           </button>
           <button
+            id="nav-link-atmosphere"
+            onClick={() => scrollToSection('atmosphere')}
+            className="text-sm tracking-wide text-[#a0a5ad] hover:text-[#b5c99a] transition-colors focus:outline-none font-normal"
+          >
+            Ambiance
+          </button>
+          <button
             id="nav-link-events"
             onClick={() => scrollToSection('events')}
             className="text-sm tracking-wide text-[#a0a5ad] hover:text-[#b5c99a] transition-colors focus:outline-none font-normal"
@@ -104,8 +124,42 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Currency Selector & Quick Reservation CTA */}
-        <div className="hidden sm:flex items-center gap-4">
+        {/* Currency Selector, Ambiance Audio, Cart & Quick Reservation CTA */}
+        <div className="hidden sm:flex items-center gap-3">
+          {/* Ambient Garden Soundscape Toggle */}
+          <button
+            onClick={toggleSound}
+            title={isAudioPlaying ? 'Mute Garden Ambiance' : 'Play Gentle Garden Soundscape'}
+            className={`p-2 rounded-full border transition-all flex items-center gap-1.5 text-xs ${
+              isAudioPlaying
+                ? 'bg-[#253020] border-[#b5c99a] text-[#b5c99a]'
+                : 'bg-[#181b1f] border-white/10 text-neutral-400 hover:text-white'
+            }`}
+          >
+            {isAudioPlaying ? <Volume2 size={15} /> : <VolumeX size={15} />}
+            <span className="hidden lg:inline text-[11px] font-medium">
+              {isAudioPlaying ? 'Sound On' : 'Ambiance'}
+            </span>
+            {isAudioPlaying && (
+              <span className="flex gap-0.5 items-end h-2.5 ml-0.5">
+                <span className="w-0.5 h-1.5 bg-[#b5c99a] animate-pulse" />
+                <span className="w-0.5 h-2.5 bg-[#b5c99a] animate-pulse delay-75" />
+                <span className="w-0.5 h-1 bg-[#b5c99a] animate-pulse delay-150" />
+              </span>
+            )}
+          </button>
+
+          {/* Sommelier Quick Button */}
+          {onOpenSommelier && (
+            <button
+              onClick={onOpenSommelier}
+              title="Edem Sommelier Wine & Drink Guide"
+              className="p-2 rounded-full bg-[#181b1f] border border-white/10 text-neutral-400 hover:text-[#c6a869] hover:border-[#c6a869]/40 transition-colors"
+            >
+              <Wine size={16} />
+            </button>
+          )}
+
           {/* Currency Toggle */}
           <div className="flex items-center rounded-full bg-[#181b1f] border border-white/10 p-0.5 text-xs">
             {(['UAH', 'USD', 'EUR'] as Currency[]).map((curr) => (
@@ -123,11 +177,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             ))}
           </div>
 
+          {/* Table Order Bag Button */}
+          {onOpenCart && (
+            <button
+              id="nav-cart-btn"
+              onClick={onOpenCart}
+              className="relative p-2 rounded-full bg-[#181b1f] border border-white/10 hover:border-[#b5c99a] text-neutral-300 hover:text-white transition-colors"
+              aria-label="View table order bag"
+            >
+              <ShoppingBag size={17} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#b5c99a] text-[#0d0f11] font-bold text-[10px] flex items-center justify-center animate-bounce">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
+
           {/* Quick Book Button */}
           <button
             id="nav-book-btn"
             onClick={onOpenReservation}
-            className="px-5 py-2 rounded-full border border-white/20 text-xs sm:text-sm tracking-wider font-light uppercase hover:bg-[#b5c99a] hover:text-[#0d0f11] hover:border-[#b5c99a] transition-all duration-300 focus:outline-none"
+            className="px-4 lg:px-5 py-2 rounded-full border border-white/20 text-xs tracking-wider font-light uppercase hover:bg-[#b5c99a] hover:text-[#0d0f11] hover:border-[#b5c99a] transition-all duration-300 focus:outline-none"
           >
             Reservation
           </button>
@@ -185,6 +256,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               Discover Menu
             </button>
             <button
+              onClick={() => scrollToSection('atmosphere')}
+              className="text-left text-lg font-cormorant text-[#a0a5ad] hover:text-[#b5c99a] py-1 border-b border-white/5"
+            >
+              Dining Ambiance Tour
+            </button>
+            <button
               onClick={() => scrollToSection('events')}
               className="text-left text-lg font-cormorant text-[#a0a5ad] hover:text-[#b5c99a] py-1 border-b border-white/5"
             >
@@ -197,13 +274,54 @@ export const Navbar: React.FC<NavbarProps> = ({
               Book Table
             </button>
 
-            <div className="pt-4 flex flex-col gap-3">
+            {/* Quick Mobile Action Pills */}
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={toggleSound}
+                className={`flex-1 py-2 px-3 rounded-xl border text-xs flex items-center justify-center gap-1.5 ${
+                  isAudioPlaying
+                    ? 'bg-[#253020] border-[#b5c99a] text-[#b5c99a]'
+                    : 'bg-white/5 border-white/10 text-neutral-300'
+                }`}
+              >
+                {isAudioPlaying ? <Volume2 size={14} /> : <VolumeX size={14} />}
+                <span>{isAudioPlaying ? 'Mute Music' : 'Garden Audio'}</span>
+              </button>
+
+              {onOpenSommelier && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenSommelier();
+                  }}
+                  className="flex-1 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-[#c6a869] flex items-center justify-center gap-1.5"
+                >
+                  <Wine size={14} />
+                  <span>Sommelier</span>
+                </button>
+              )}
+            </div>
+
+            <div className="pt-3 flex flex-col gap-2.5">
+              {onOpenCart && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenCart();
+                  }}
+                  className="w-full py-3 rounded-full bg-[#181d24] border border-[#b5c99a]/40 text-[#b5c99a] font-medium text-xs text-center uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag size={15} />
+                  <span>View Table Order Bag ({cartCount})</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenReservation();
                 }}
-                className="w-full py-3 rounded-full bg-[#b5c99a] text-[#0d0f11] font-medium text-sm text-center uppercase tracking-wider"
+                className="w-full py-3 rounded-full bg-[#b5c99a] text-[#0d0f11] font-semibold text-xs text-center uppercase tracking-wider"
               >
                 Reserve a Table
               </button>

@@ -4,7 +4,11 @@ import { Calendar, Clock, Users, CheckCircle, Sparkles, User, MapPin, X, Utensil
 import confetti from 'canvas-confetti';
 import { ReservationData } from '../types';
 
-export const ReservationSection: React.FC = () => {
+interface ReservationSectionProps {
+  selectedSeatingArea?: 'Garden Terrace' | 'Main Botanical Hall' | 'Private Glasshouse' | 'Wine Cellar';
+}
+
+export const ReservationSection: React.FC<ReservationSectionProps> = ({ selectedSeatingArea }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -12,9 +16,15 @@ export const ReservationSection: React.FC = () => {
     persons: '2',
     timing: '19:00',
     date: new Date().toISOString().split('T')[0],
-    seatingArea: 'Garden Terrace' as 'Garden Terrace' | 'Main Botanical Hall' | 'Private Glasshouse' | 'Wine Cellar',
+    seatingArea: selectedSeatingArea || ('Garden Terrace' as 'Garden Terrace' | 'Main Botanical Hall' | 'Private Glasshouse' | 'Wine Cellar'),
     specialRequests: ''
   });
+
+  React.useEffect(() => {
+    if (selectedSeatingArea) {
+      setFormData((prev) => ({ ...prev, seatingArea: selectedSeatingArea }));
+    }
+  }, [selectedSeatingArea]);
 
   const [confirmedReservation, setConfirmedReservation] = useState<ReservationData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

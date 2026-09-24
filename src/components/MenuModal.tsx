@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Search, Sparkles, Filter, Leaf, Wheat, Wine, Utensils, Heart } from 'lucide-react';
+import { X, Search, Sparkles, Filter, Leaf, Wheat, Wine, Utensils, Heart, Plus, Check } from 'lucide-react';
 import { MenuItem, Currency } from '../types';
 import { MENU_ITEMS } from '../data/restaurantData';
 
@@ -11,6 +11,7 @@ interface MenuModalProps {
   currentCurrency: Currency;
   onSelectDish: (dish: MenuItem) => void;
   onOpenReservation: () => void;
+  onAddToCart?: (dish: MenuItem) => void;
 }
 
 export const MenuModal: React.FC<MenuModalProps> = ({
@@ -20,11 +21,13 @@ export const MenuModal: React.FC<MenuModalProps> = ({
   currentCurrency,
   onSelectDish,
   onOpenReservation,
+  onAddToCart,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [vegetarianOnly, setVegetarianOnly] = useState(false);
   const [glutenFreeOnly, setGlutenFreeOnly] = useState(false);
+  const [recentlyAddedIds, setRecentlyAddedIds] = useState<string[]>([]);
 
   // Update selected category when initialCategory changes
   React.useEffect(() => {
@@ -239,11 +242,44 @@ export const MenuModal: React.FC<MenuModalProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5 text-[11px] text-neutral-400">
-                      <span className="italic text-[#c6a869] flex items-center gap-1">
-                        <Wine size={12} />
-                        <span className="truncate max-w-[120px]">{item.winePairing || 'Paired wine'}</span>
+                      <span className="italic text-[#c6a869] flex items-center gap-1 min-w-0">
+                        <Wine size={12} className="shrink-0" />
+                        <span className="truncate max-w-[100px] sm:max-w-[130px]">{item.winePairing || 'Paired wine'}</span>
                       </span>
-                      <span className="text-[#b5c99a] group-hover:underline">View Details →</span>
+
+                      <div className="flex items-center gap-2">
+                        {onAddToCart && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddToCart(item);
+                              setRecentlyAddedIds((prev) => [...prev, item.id]);
+                              setTimeout(() => {
+                                setRecentlyAddedIds((prev) => prev.filter((id) => id !== item.id));
+                              }, 1800);
+                            }}
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all flex items-center gap-1 ${
+                              recentlyAddedIds.includes(item.id)
+                                ? 'bg-[#b5c99a] text-[#0d0f11]'
+                                : 'bg-white/10 hover:bg-[#b5c99a] hover:text-[#0d0f11] text-white'
+                            }`}
+                          >
+                            {recentlyAddedIds.includes(item.id) ? (
+                              <>
+                                <Check size={10} />
+                                <span>Added</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus size={10} />
+                                <span>Add</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                        <span className="text-[#b5c99a] group-hover:underline text-[11px]">Details →</span>
+                      </div>
                     </div>
                   </div>
                 </div>

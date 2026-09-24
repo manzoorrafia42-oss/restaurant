@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Sparkles, Wine, Clock, Flame, Leaf, Wheat, Heart, Calendar } from 'lucide-react';
+import { X, Sparkles, Wine, Clock, Flame, Leaf, Wheat, Heart, Calendar, Plus, Check, ShoppingBag } from 'lucide-react';
 import { MenuItem, Currency } from '../types';
 
 interface DishDetailModalProps {
@@ -8,6 +8,7 @@ interface DishDetailModalProps {
   onClose: () => void;
   currentCurrency: Currency;
   onOpenReservation: () => void;
+  onAddToCart?: (dish: MenuItem) => void;
 }
 
 export const DishDetailModal: React.FC<DishDetailModalProps> = ({
@@ -15,7 +16,9 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   onClose,
   currentCurrency,
   onOpenReservation,
+  onAddToCart,
 }) => {
+  const [added, setAdded] = useState(false);
   if (!dish) return null;
 
   const formatPrice = (item: MenuItem) => {
@@ -149,22 +152,50 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="pt-2 flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-5 py-3 rounded-full border border-white/10 text-xs text-neutral-400 hover:text-white"
-            >
-              Close
-            </button>
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+            {onAddToCart && (
+              <button
+                onClick={() => {
+                  onAddToCart(dish);
+                  setAdded(true);
+                  setTimeout(() => setAdded(false), 2000);
+                }}
+                className={`w-full sm:w-auto px-5 py-3 rounded-full text-xs uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-2 ${
+                  added
+                    ? 'bg-[#b5c99a] text-[#0d0f11]'
+                    : 'bg-[#c6a869] text-[#0d0f11] hover:bg-[#dec186]'
+                }`}
+              >
+                {added ? (
+                  <>
+                    <Check size={15} />
+                    <span>Added to Order</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={15} />
+                    <span>Add to Table Order</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => {
                 onClose();
                 onOpenReservation();
               }}
-              className="flex-1 py-3 rounded-full bg-[#b5c99a] text-[#0d0f11] font-semibold text-xs uppercase tracking-wider hover:bg-[#cde4b3] transition-colors flex items-center justify-center gap-2"
+              className="w-full sm:flex-1 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
             >
               <Calendar size={15} />
-              <span>Reserve Table for this Dish</span>
+              <span>Book Table for this Dish</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="w-full sm:w-auto px-4 py-3 rounded-full border border-white/10 text-xs text-neutral-400 hover:text-white"
+            >
+              Close
             </button>
           </div>
         </div>

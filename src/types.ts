@@ -53,3 +53,24 @@ export interface ReservationData {
 }
 
 export type Currency = 'UAH' | 'USD' | 'EUR';
+
+export interface CartItem {
+  dish: MenuItem;
+  quantity: number;
+  specialNote?: string;
+}
+
+export interface OrderData {
+  id: string;
+  items: CartItem[];
+  orderType: 'dine-in' | 'delivery' | 'pickup';
+  tableNumber?: string;
+  deliveryAddress?: string;
+  customerName: string;
+  customerPhone: string;
+  totalUAH: number;
+  totalUSD: number;
+  totalEUR: number;
+  status: 'confirmed' | 'preparing';
+  createdAt: string;
+}

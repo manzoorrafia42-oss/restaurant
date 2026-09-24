@@ -2,19 +2,24 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MenuItem, Currency } from '../types';
 import { MENU_ITEMS } from '../data/restaurantData';
-import { Info, Sparkles, Heart, Wine, Flame } from 'lucide-react';
+import { Info, Sparkles, Heart, Wine, Flame, Plus, Check } from 'lucide-react';
 
 interface PopularDishesSectionProps {
   currentCurrency: Currency;
   onSelectDish: (dish: MenuItem) => void;
+  onAddToCart?: (dish: MenuItem) => void;
+  onOpenSommelier?: () => void;
 }
 
 export const PopularDishesSection: React.FC<PopularDishesSectionProps> = ({
   currentCurrency,
   onSelectDish,
+  onAddToCart,
+  onOpenSommelier,
 }) => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'classic' | 'modern' | 'all'>('classic');
+  const [recentlyAdded, setRecentlyAdded] = useState<string[]>([]);
 
   const classicDishes = MENU_ITEMS.filter((item) =>
     ['bolognese', 'green-carbonara', 'rack-of-lamb'].includes(item.id)
@@ -177,17 +182,49 @@ export const PopularDishesSection: React.FC<PopularDishesSectionProps> = ({
                     </div>
 
                     {/* Bottom Dish Footer */}
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-neutral-400">
-                      <div className="flex items-center gap-2">
-                        <Wine size={14} className="text-[#c6a869]" />
-                        <span className="truncate max-w-[140px] italic text-[11px] text-neutral-300 font-serif">
+                    <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2 text-xs text-neutral-400">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Wine size={13} className="text-[#c6a869] shrink-0" />
+                        <span className="truncate max-w-[110px] sm:max-w-[130px] italic text-[11px] text-neutral-300 font-serif">
                           {dish.winePairing || 'Craft Pairing'}
                         </span>
                       </div>
-                      <span className="text-[11px] text-[#b5c99a] group-hover:underline flex items-center gap-1 font-light">
-                        <Info size={13} />
-                        <span>Details</span>
-                      </span>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {onAddToCart && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddToCart(dish);
+                              setRecentlyAdded((prev) => [...prev, dish.id]);
+                              setTimeout(() => {
+                                setRecentlyAdded((prev) => prev.filter((id) => id !== dish.id));
+                              }, 1800);
+                            }}
+                            className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all flex items-center gap-1 ${
+                              recentlyAdded.includes(dish.id)
+                                ? 'bg-[#b5c99a] text-[#0d0f11]'
+                                : 'bg-white/10 hover:bg-[#b5c99a] hover:text-[#0d0f11] text-white'
+                            }`}
+                          >
+                            {recentlyAdded.includes(dish.id) ? (
+                              <>
+                                <Check size={11} />
+                                <span>Added</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus size={11} />
+                                <span>Add</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                        <span className="text-[11px] text-[#b5c99a] group-hover:underline flex items-center gap-0.5 font-light">
+                          <Info size={12} />
+                          <span>Details</span>
+                        </span>
+                      </div>
                     </div>
 
                   </div>
@@ -196,6 +233,35 @@ export const PopularDishesSection: React.FC<PopularDishesSectionProps> = ({
             })}
           </AnimatePresence>
         </div>
+
+        {/* Sommelier Pairing Advisor Banner */}
+        {onOpenSommelier && (
+          <div className="mt-14 bg-gradient-to-r from-[#181d16] via-[#1c1913] to-[#181d16] border border-[#c6a869]/30 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+            <div className="flex items-center gap-4 text-left">
+              <div className="w-12 h-12 rounded-2xl bg-[#2e2617] border border-[#c6a869]/40 flex items-center justify-center text-[#c6a869] shrink-0">
+                <Wine size={22} />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-[#c6a869] font-medium block">
+                  Sommelier Recommendation
+                </span>
+                <h4 className="font-cormorant text-2xl italic text-white font-normal">
+                  Find The Ideal Wine or Botanical Drink For Your Meal
+                </h4>
+                <p className="text-xs text-neutral-400 font-light mt-0.5 max-w-lg">
+                  Explore which vintage, craft beer, or non-alcoholic elixir best enhances your Zinger burger, shawarma wrap, or prime lamb.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenSommelier}
+              className="px-6 py-3 rounded-full bg-[#c6a869] hover:bg-[#dec186] text-[#0d0f11] text-xs font-semibold uppercase tracking-widest transition-colors shrink-0 shadow-lg"
+            >
+              Open Sommelier Guide
+            </button>
+          </div>
+        )}
 
       </div>
     </section>
